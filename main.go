@@ -30,6 +30,7 @@ var packages = [...]string{
 }
 
 type repo struct {
+	Name     string              `json:"name"`
 	Stars    int                 `json:"stars"`
 	Packages map[string][]string `json:"packages"`
 }
@@ -37,6 +38,7 @@ type repo struct {
 func main() {
 	client := github.NewClient(context.Background(), util.MustEnv("GITHUB_PERSONAL_TOKEN"))
 	r := make(map[string]*repo)
+	var sorted []*repo
 
 	log.Printf("Loading ignorelist from GitHub...")
 	ignore, err := loadIgnoreSet(client)
@@ -72,20 +74,38 @@ func main() {
 					}
 				}
 				r[proj] = &repo{
+					Name:  proj,
 					Stars: stars,
 					Packages: map[string][]string{
 						imp: {pkg},
 					},
 				}
+				// maintain list sorted by stars
+				sorted = sortedInsert(sorted, r[proj])
 			} else {
 				r[proj].Packages[imp] = append(r[proj].Packages[imp], pkg)
 			}
 		}
 	}
 
-	if err := json.NewEncoder(os.Stdout).Encode(r); err != nil {
+	if err := json.NewEncoder(os.Stdout).Encode(sorted); err != nil {
 		log.Fatalf("Error writing report: %s", err)
 	}
+}
+
+func sortedInsert(sorted []*repo, re *repo) []*repo {
+	var added bool
+	for i, item := range sorted {
+		if re.Stars > item.Stars {
+			sorted = append(sorted[:i], append([]*repo{re}, sorted[i:]...)...)
+			added = true
+			break
+		}
+	}
+	if !added {
+		sorted = append(sorted, re)
+	}
+	return sorted
 }
 
 func loadIgnoreSet(client *github.Client) (map[string]bool, error) {
