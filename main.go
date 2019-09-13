@@ -13,20 +13,27 @@ import (
 )
 
 var packages = [...]string{
-	"helper/acctest",
-	"helper/customdiff",
-	"helper/encryption",
+	"helper/schema",
+	"terraform",
+	"helper/resource",
+	"plugin",
+	"helper/validation",
 	"helper/hashcode",
+	"helper/acctest",
 	"helper/logging",
 	"helper/mutexkv",
 	"helper/pathorcontents",
-	"helper/resource",
-	"helper/schema",
 	"helper/structure",
-	"helper/validation",
+	"helper/customdiff",
 	"httpclient",
-	"plugin",
-	"terraform",
+	"helper/encryption",
+	"config",
+	"configs/configschema",
+	"flatmap",
+	"svchost/disco",
+	"svchost/auth",
+	"svchost",
+	"lang",
 }
 
 type repo struct {
